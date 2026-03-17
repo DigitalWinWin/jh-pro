@@ -190,12 +190,35 @@ Die Basisdokumente liegen unter `basisdokumente/` und sind die zentrale Wissensq
 
 Setup-Anleitungen: `mcp-konfiguration/`
 
+## KONTEXT.md — Kunden-Tracking (PFLICHT)
+
+Jeder Kunde hat eine `KONTEXT.md` unter `kunden/[bereich]_[kundenname]/KONTEXT.md`.
+Das ist das zentrale Logbuch — Claude MUSS es bei jeder Kundenarbeit nutzen.
+
+### Workflow bei jedem Skill-Einsatz:
+1. **LESEN:** `kunden/[kunde]/KONTEXT.md` → aktuellen Stand prüfen
+2. **ARBEITEN:** Skill ausführen
+3. **SCHREIBEN:** KONTEXT.md aktualisieren:
+   - Phase + "Letzter Skill" anpassen
+   - Checkbox des Skills abhaken `[x]`
+   - Nächsten Schritt setzen
+   - Verlauf-Eintrag: `[YYYY-MM-DD] | Aktion | Ergebnis | Juliane/Claude`
+   - Offene Lücken aktualisieren
+
+### Neuen Kunden anlegen:
+1. `kunden/_template/` kopieren → `kunden/[bereich]_[kundenname]/`
+2. `KONTEXT.md` öffnen und Stammdaten ausfüllen
+3. `README.md` löschen
+
 ## Datei-Konventionen
 
 - Basisdokumente: `[typ]-[KUERZEL]-v[version].md` (z.B. `positionierung-PB-v2.md`)
 - Kundenordner: `kunden/[bereich]_[name]/` (z.B. `kunden/pb_praxis-goettingen/`)
-- Protokolle: `kunden/[ordner]/protokolle/[datum]-[thema].md`
-- Angebote: `vorlagen/angebote/` (Templates, NIE überschreiben — kopieren)
+- Protokolle: `kunden/[ordner]/protokolle/YYYY-MM-DD-[thema].md`
+- Konzepte: `kunden/[ordner]/konzepte/[typ]-[kundenname]-v[version].md`
+- Angebote: `kunden/[ordner]/angebote/angebot-[kundenname]-[datum].md`
+- Transkripte: `kunden/[ordner]/transkripte/YYYY-MM-DD-[gespraechstyp].txt`
+- Vorlagen: `vorlagen/` (Templates, NIE überschreiben — kopieren)
 - Skills: `skills/[skill-name]/SKILL.md` + `references/` + `assets/`
 
 ## Strategie-Kontext
