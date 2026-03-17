@@ -1,3 +1,7 @@
+# Kundendaten (DSGVO-Schutz — bleiben NUR lokal!)
+kunden/*/
+!kunden/_template/
+
 # Environment & secrets
 .env
 .env.*
