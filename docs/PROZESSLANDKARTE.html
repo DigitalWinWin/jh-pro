@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prozesslandkarte — Juliane Hoffmann KI-Arbeitsumgebung</title>
+<style>
+  :root {
+    --slate: #3D5A6B;
+    --coral: #E8735A;
+    --beige: #F5F0EB;
+    --teal: #7A9BA5;
+    --navy: #013253;
+    --lime: #9CCA36;
+    --mint: #4ECDC4;
+    --gold: #D4A843;
+    --red: #E85A5A;
+    --bg: #0F1419;
+    --card: #1A2332;
+    --card-hover: #1E2A3A;
+    --border: #2A3A4A;
+    --text: #E8E8E8;
+    --muted: #8899AA;
+    --human: #FF9F43;
+    --ki: #54A0FF;
+    --auto: #5F27CD;
+    --mcp: #01A3A4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--slate) 0%, var(--navy) 100%);
+    padding: 40px 32px 32px;
+    border-bottom: 3px solid var(--coral);
+  }
+  .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+  .header .subtitle { color: var(--teal); font-size: 1rem; }
+  .header .meta { color: var(--muted); font-size: 0.85rem; margin-top: 12px; }
+
+  /* NAV TABS */
+  .nav {
+    display: flex;
+    gap: 0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 14px 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .nav button:hover { color: var(--text); background: var(--card-hover); }
+  .nav button.active { color: var(--coral); border-bottom-color: var(--coral); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 32px; max-width: 1400px; margin: 0 auto; }
+  .section.active { display: block; }
+  .section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding: 16px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* PROCESS FLOW */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+  .flow::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    bottom: 24px;
+    width: 3px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .step-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #fff;
+    flex-shrink: 0;
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--border);
+  }
+  .step-dot.human { background: var(--human); }
+  .step-dot.ki { background: var(--ki); }
+  .step-dot.auto { background: var(--auto); }
+  .step-dot.mcp { background: var(--mcp); }
+  .step-dot.strategy { background: var(--gold); }
+
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .step-card:hover {
+    background: var(--card-hover);
+    border-color: var(--teal);
+    transform: translateX(4px);
+  }
+  .step-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-card .desc { font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
+
+  .io-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .io-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+  }
+  .io-box .label {
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .io-box.input .label { color: var(--ki); }
+  .io-box.context .label { color: var(--teal); }
+  .io-box.output .label { color: var(--lime); }
+  .io-box.tool .label { color: var(--mcp); }
+  .io-box.human-loop .label { color: var(--human); }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag.pb { background: rgba(232,115,90,0.2); color: var(--coral); }
+  .tag.pf { background: rgba(1,50,83,0.4); color: #5AADE8; border: 1px solid rgba(90,173,232,0.3); }
+  .tag.df { background: rgba(78,205,196,0.2); color: var(--mint); }
+  .tag.all { background: rgba(212,168,67,0.2); color: var(--gold); }
+  .tag.skill { background: rgba(84,160,255,0.15); color: var(--ki); }
+  .tag.new { background: rgba(156,202,54,0.2); color: var(--lime); }
+  .tag.auto-tag { background: rgba(95,39,205,0.2); color: #A78BFA; }
+
+  /* STRATEGY CARDS */
+  .strat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .strat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    border-left: 4px solid var(--gold);
+  }
+  .strat-card h3 { font-size: 1rem; margin-bottom: 8px; }
+  .strat-card .impact { font-size: 0.82rem; color: var(--muted); }
+  .strat-card ul { margin-top: 10px; padding-left: 18px; font-size: 0.88rem; }
+  .strat-card li { margin-bottom: 4px; }
+
+  /* PRODUCT LADDER */
+  .ladder {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 800px;
+    margin: 0 auto 32px;
+  }
+  .ladder-step {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .ladder-bar {
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+  }
+  .ladder-content {
+    flex: 1;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-left: none;
+    background: var(--card);
+  }
+  .ladder-content h4 { font-size: 0.95rem; margin-bottom: 4px; }
+  .ladder-content .price { color: var(--lime); font-weight: 600; font-size: 0.9rem; }
+  .ladder-content .detail { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
+
+  /* AUTOMATION TABLE */
+  .auto-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+  }
+  .auto-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--card);
+    color: var(--teal);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border);
+  }
+  .auto-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .auto-table tr:hover td { background: var(--card-hover); }
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .status-dot.active { background: var(--lime); }
+  .status-dot.planned { background: var(--gold); }
+  .status-dot.idea { background: var(--muted); }
+
+  /* CROSS-SELLING */
+  .cross-paths {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .cross-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cross-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+  .cross-card.high::before { background: var(--lime); }
+  .cross-card.medium::before { background: var(--gold); }
+  .cross-card .path-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+  }
+  .path-arrow { color: var(--coral); font-weight: 700; }
+  .path-node {
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .potential { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+  .potential strong { color: var(--lime); }
+
+  /* TOOL OVERVIEW */
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .tool-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .tool-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .tool-card h4 { font-size: 0.92rem; margin-bottom: 4px; }
+  .tool-card .tool-desc { font-size: 0.8rem; color: var(--muted); }
+  .tool-card .tool-status { font-size: 0.75rem; margin-top: 6px; }
+
+  /* BLOCKADE SECTION */
+  .blockade-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .blockade-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+  }
+  .blockade-card.solved { border-left-color: var(--lime); opacity: 0.7; }
+  .blockade-card h4 { font-size: 0.92rem; margin-bottom: 6px; }
+  .blockade-card .solution { font-size: 0.82rem; color: var(--teal); margin-top: 8px; }
+
+  @media (max-width: 768px) {
+    .header { padding: 24px 16px; }
+    .section { padding: 20px 16px; }
+    .io-grid { grid-template-columns: 1fr; }
+    .strat-grid, .cross-paths, .tool-grid, .blockade-grid { grid-template-columns: 1fr; }
+    .nav button { padding: 12px 14px; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Prozesslandkarte</h1>
+  <div class="subtitle">Juliane Hoffmann — KI-Arbeitsumgebung | 6 Bereiche | 13 Skills | 4 Phasen</div>
+  <div class="meta">Digital WinWin (Dominique Stalder) | Stand: Februar 2026 | Basiert auf Interview 17.02.2026 + 38 Basisdokumente</div>
+</div>
+
+<div class="nav" id="nav">
+  <button class="active" onclick="show('strategie')">Strategie</button>
+  <button onclick="show('pb-kundengewinnung')">PB: Kundengewinnung</button>
+  <button onclick="show('pb-beratung')">PB: Beratungsprojekt</button>
+  <button onclick="show('pb-laufend')">PB: Laufende Betreuung</button>
+  <button onclick="show('pf')">PF: Praxis Factory</button>
+  <button onclick="show('df')">DF: Dr. Flex / ZEN</button>
+  <button onclick="show('content')">Content &amp; Marketing</button>
+  <button onclick="show('email')">E-Mail &amp; Newsletter</button>
+  <button onclick="show('produkte')">Digitale Produkte</button>
+  <button onclick="show('produkttreppe')">Produkttreppe</button>
+  <button onclick="show('crossselling')">Cross-Selling</button>
+  <button onclick="show('automations')">n8n / Automationen</button>
+  <button onclick="show('tools')">Tools &amp; MCP</button>
+  <button onclick="show('blockaden')">Blockaden &amp; Lösungen</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- STRATEGIE -->
+<!-- ============================================================ -->
+<div class="section active" id="strategie">
+  <h2><span style="color:var(--gold)">&#9733;</span> Strategieebene &amp; Entscheidungen</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--human)"></div> Human-in-the-Loop</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--ki)"></div> KI-gestützt (Claude)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--auto)"></div> Automatisierung (n8n)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--mcp)"></div> MCP-Tool</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> Strategische Entscheidung</div>
+  </div>
+
+  <h3 style="margin-bottom:16px;color:var(--teal)">Vision &amp; Zielzustand</h3>
+  <div class="strat-grid">
+    <div class="strat-card">
+      <h3>Umsatzziel</h3>
+      <div class="impact">12.000 EUR/Monat realistisch | 15.000 EUR ambitioniert (~200k/Jahr)</div>
+      <ul>
+        <li>Max. 24-30h/Woche Arbeitszeit</li>
+        <li>185 EUR/h Neukunden (hoch von 150)</li>
+        <li>Passives Einkommen durch digitale Produkte</li>
+      </ul>
+    </div>
+    <div class="strat-card">
+      <h3>Bereichsstrategie</h3>
+      <div class="impact">Fokussierung auf Kernbereiche</div>
+      <ul>
+        <li><strong style="color:var(--lime)">WACHSEN:</strong> PB (Praxisberatung) + PF (Praxis Factory)</li>
+        <li><strong style="color:var(--gold)">HALTEN:</strong> DF (Dr. Flex), IN (Innodentum), WS (Waldorfschule)</li>
+        <li><strong style="color:var(--red)">ABBAUEN:</strong> AB (Didento) — Exit-Strategie</li>
+      </ul>
+    </div>
+    <div class="strat-card">
+      <h3>Offene Strategieentscheidung: EU in PF eingliedern?</h3>
+      <div class="impact">Juliane erwägt Einzelunternehmen aufzulösen und alles über Praxis Factory GmbH abzuwickeln</div>
+      <ul>
+        <li>Gleiche Dienstleistung, gleiche Zielgruppe</li>
+        <li>Weniger Marken = weniger Aufwand (1 Insta statt 2)</li>
+        <li>GmbH-Status = professionellerer Außenauftritt</li>
+        <li><strong style="color:var(--human)">Entscheidung offen</strong> — Steuerberater konsultieren</li>
+      </ul>
+    </div>
+    <div class="strat-card">
+      <h3>Keine Gruppenformate</h3>
+      <div class="impact">Explizit NICHT gewünscht</div>
+      <ul>
+        <li>Kein Mastermind, kein Gruppencoaching</li>
+        <li>Nur 1:1-Beratung + digitale Selbstlern-Produkte</li>
+        <li>Keine Mitarbeiter gewünscht — KI als "virtuelle Mitarbeiterin"</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:16px;color:var(--teal)">4-Phasen-Umsetzungsplan</h3>
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot strategy">P1</div>
+      <div class="step-card">
+        <h3>Phase 1: Fundament <span class="tag new">JETZT</span></h3>
+        <div class="desc">Basisdokumente, KI-Skills, E-Mail-Problem, Stundensatz</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Deliverables</div>38 Basisdokumente, CLAUDE.md, 13 Skills, Protokoll-Skill aktiv</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork, Dateisystem-MCP, Zoom + Sally.io, Todoist</div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Stundensatz auf 185 EUR umstellen (beschlossen)</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot strategy">P2</div>
+      <div class="step-card">
+        <h3>Phase 2: Systematisierung</h3>
+        <div class="desc">Master Prompts, Cross-Selling-Pfade, Didento Exit</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Deliverables</div>Master Prompt Digi-Konzept, Maßnahmenplan-Optimierung, Cross-Selling PF→PB</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Skills, Lexware (Angebote), Airtable (CRM-Ersatz)</div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Didento Exit-Strategie + CRM-Wahl</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot strategy">P3</div>
+      <div class="step-card">
+        <h3>Phase 3: Sichtbarkeit</h3>
+        <div class="desc">Webinar-Funnel, Instagram-Systematisierung, Testimonials, Follow-up</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Deliverables</div>Lead Magnet (Freebie), E-Mail-Serie, Testimonial-System, Follow-up-Prozess</div>
+          <div class="io-box tool"><div class="label">Tools</div>n8n Automationen, E-Mail-Marketing-Tool, Canva, Instagram</div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Freebie-Thema, E-Mail-Tool-Wahl, Content-Frequenz</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot strategy">P4</div>
+      <div class="step-card">
+        <h3>Phase 4: Passive Einkommensströme</h3>
+        <div class="desc">FAQ-Videokurs, Chatbot-Abo, Dr. Flex Affiliate</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Deliverables</div>FAQ-Videokurs (HeyGen), Interaktiver Chatbot, Affiliate-Deal</div>
+          <div class="io-box tool"><div class="label">Tools</div>HeyGen, Kursplattform, Chatbot-Builder, Dr. Flex API</div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Kurs-Preis, Plattform, Chatbot-Funktionsumfang</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PB: KUNDENGEWINNUNG -->
+<!-- ============================================================ -->
+<div class="section" id="pb-kundengewinnung">
+  <h2><span class="tag pb">PB</span> Kundengewinnung — Praxisberatung</h2>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--human)"></div> Juliane entscheidet</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--ki)"></div> Claude Skill</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--auto)"></div> n8n Automation</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--mcp)"></div> MCP-Tool</div>
+  </div>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot auto">1</div>
+      <div class="step-card">
+        <h3>Lead-Eingang <span class="tag pb">PB</span></h3>
+        <div class="desc">Empfehlung, Website, Webinar, Netzwerk, Christina Fritz, Dr. Flex ZEN-Praxen</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Kontaktanfrage (Website-Formular, E-Mail, Empfehlung, Webinar-Teilnehmer)</div>
+          <div class="io-box context"><div class="label">Kontext</div>Zielgruppen-PB-V3.md, Customer-Journey-PB-v3.md</div>
+          <div class="io-box output"><div class="label">Output</div>Lead-Eintrag in CRM/Airtable, automatische Bestätigungs-E-Mail</div>
+          <div class="io-box tool"><div class="label">Tools</div>Calendly, Website (juliane-hoffmann.de), Airtable (geplant), n8n (geplant)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">2</div>
+      <div class="step-card">
+        <h3>Kundenbriefing vorbereiten <span class="tag skill">S07</span></h3>
+        <div class="desc">Claude recherchiert verfügbare Infos und erstellt Gesprächsleitfaden vor dem Erstgespräch</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Praxisname, Ort, Kontaktdaten, Anfrage-Kontext</div>
+          <div class="io-box context"><div class="label">Kontext</div>Produktdefinition-PB-V2.md, Preise, Pakete, Website der Praxis</div>
+          <div class="io-box output"><div class="label">Output</div>Strukturiertes Kundenbriefing (Praxisprofil, Gesprächsleitfaden, Paketempfehlung)</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S07], Chrome Control MCP (Website-Analyse)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot human">3</div>
+      <div class="step-card">
+        <h3>Erstgespräch (30 Min.) <span class="tag pb">PB</span> <span class="tag" style="background:rgba(255,159,67,0.2);color:var(--human)">HUMAN</span></h3>
+        <div class="desc">Juliane führt Erstgespräch via Zoom. Kostenlos, Bedarfsermittlung, Paketempfehlung. <strong>Julianes Kernkompetenz — nicht delegierbar.</strong></div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Kundenbriefing [S07], Calendly-Termin, Zoom-Link</div>
+          <div class="io-box context"><div class="label">Kontext</div>Praxisprofil, Pakete (Starter 8.500 / Profi 10.500 / Elite 17.000-18.500)</div>
+          <div class="io-box output"><div class="label">Output</div>Transkript (Sally.io), Bedarfsermittlung, Paketempfehlung</div>
+          <div class="io-box tool"><div class="label">Tools</div>Zoom, Sally.io (Transkript), Calendly</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane entscheidet: Passt der Kunde? Welches Paket empfehlen? Angebot senden?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">4</div>
+      <div class="step-card">
+        <h3>Angebot erstellen <span class="tag skill">S06</span></h3>
+        <div class="desc">Claude erstellt Angebot basierend auf Erstgespräch. Juliane finalisiert in Lexware.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Erstgesprächs-Transkript, Paketempfehlung, Praxisdaten</div>
+          <div class="io-box context"><div class="label">Kontext</div>VORLAGE-Angebot-Medikit.md, Produktdefinition-PB-V2.md</div>
+          <div class="io-box output"><div class="label">Output</div>Angebotsentwurf (Markdown), dann Lexware-Angebot</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S06], Lexware (Finalisierung)</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane prüft + finalisiert Angebot, sendet über Lexware</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot auto">5</div>
+      <div class="step-card">
+        <h3>Follow-up bei Nicht-Antwort <span class="tag skill">S04</span> <span class="tag new">NEU</span></h3>
+        <div class="desc">Automatisierte Follow-up-Sequenz nach Angebot. Aktuell FEHLT — größte Lücke im Funnel.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Angebotsdatum, Kunde, Paketstufe</div>
+          <div class="io-box context"><div class="label">Kontext</div>Brand-Voice-PB-V2.md (Du-Form), Einwandbehandlung aus Customer-Journey</div>
+          <div class="io-box output"><div class="label">Output</div>E-Mail-Sequenz: Tag 3 (Nachfrage) → Tag 7 (Mehrwert) → Tag 14 (Letzte Chance)</div>
+          <div class="io-box tool"><div class="label">Tools (geplant)</div>n8n Automation, E-Mail-Marketing-Tool, Airtable (Lead-Status), Claude [S04]</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane gibt E-Mail-Entwürfe frei, entscheidet bei Sonderfällen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot human">6</div>
+      <div class="step-card">
+        <h3>Auftragsbestätigung &amp; Kick-Off planen</h3>
+        <div class="desc">Kunde bestätigt → Auftragsbestätigung via Lexware → Kick-Off-Termin planen</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Auftragsbestätigung des Kunden</div>
+          <div class="io-box output"><div class="label">Output</div>Lexware-Auftragsbestätigung, Kick-Off-Termin (Calendly), Kundenordner anlegen</div>
+          <div class="io-box tool"><div class="label">Tools</div>Lexware, Calendly, Claude (Ordner anlegen), Airtable (Status-Update)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PB: BERATUNGSPROJEKT -->
+<!-- ============================================================ -->
+<div class="section" id="pb-beratung">
+  <h2><span class="tag pb">PB</span> Beratungsprojekt (Medikit)</h2>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--human)"></div> Juliane entscheidet</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--ki)"></div> Claude Skill</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--mcp)"></div> MCP-Tool</div>
+  </div>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot human">1</div>
+      <div class="step-card">
+        <h3>Kick-Off-Gespräch (60-90 Min.) <span class="tag" style="background:rgba(255,159,67,0.2);color:var(--human)">HUMAN</span></h3>
+        <div class="desc">Juliane führt Kick-Off via Zoom. Ist-Analyse: Organigramm, Prozesse, Teamstruktur. 8-10 Calls/Woche.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Kundenbriefing, Angebot/Paket, Praxisdaten</div>
+          <div class="io-box output"><div class="label">Output</div>Transkript (Sally.io), Ist-Aufnahme, erste Erkenntnisse</div>
+          <div class="io-box tool"><div class="label">Tools</div>Zoom, Sally.io (Transkript), Medikit (Praxis-Account)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">2</div>
+      <div class="step-card">
+        <h3>Coaching-Protokoll erstellen <span class="tag skill">S01 AKTIV</span></h3>
+        <div class="desc">Dual-Brand-Protokoll aus Transkript. Python-Script generiert DOCX mit Praxis Factory oder JH Branding.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Sally.io-Transkript (Text oder Datei)</div>
+          <div class="io-box context"><div class="label">Kontext</div>Brand-Auswahl (PF Navy/Lime oder JH Teal), 7-Sektionen-Format</div>
+          <div class="io-box output"><div class="label">Output</div>DOCX-Protokoll (Themen, Erkenntnisse, Maßnahmen, Action Items, Zitate)</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S01], Python-Script (generate.py), DOCX-Templates</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane wählt Brand (PF/JH), prüft Protokoll, ergänzt ggf. Details</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">3</div>
+      <div class="step-card">
+        <h3>Digitalisierungskonzept erstellen <span class="tag skill">S02</span></h3>
+        <div class="desc">Aus Ist-Analyse und Kick-Off wird ein individuelles Digitalisierungskonzept abgeleitet.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Kick-Off-Protokoll, Ist-Analyse, Medikit-Struktur der Praxis</div>
+          <div class="io-box context"><div class="label">Kontext</div>Best-Practices-Medikit-PB-V2.md, SOP-Beratungsprozess-PB-V2.md</div>
+          <div class="io-box output"><div class="label">Output</div>Digitalisierungskonzept (Ist-Zustand, Soll-Zustand, Maßnahmen, Priorisierung)</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S02], Medikit (Praxis-Daten)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">4</div>
+      <div class="step-card">
+        <h3>Medikit-Setup <span class="tag skill">S08</span></h3>
+        <div class="desc">Medikit-Grundstruktur für Praxis aufsetzen: Organigramm, Ordner, Vorlagen, Sichtrechte.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Praxisgröße, Team, gebuchtes Paket (Starter/Profi/Elite)</div>
+          <div class="io-box context"><div class="label">Kontext</div>Best-Practices-Medikit-PB-V2.md, Paket-Spezifikation</div>
+          <div class="io-box output"><div class="label">Output</div>Organigramm-Vorlage, Ordnerstruktur, Implementierungs-Checkliste</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S08], Medikit-Plattform</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot human">5</div>
+      <div class="step-card">
+        <h3>Implementierung (Remote + Vor-Ort) <span class="tag" style="background:rgba(255,159,67,0.2);color:var(--human)">HUMAN</span></h3>
+        <div class="desc">Juliane implementiert Medikit in der Praxis. Bei Elite-Paket: Vor-Ort (2.200 EUR/Tag + Reise).</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Medikit-Setup-Plan, Checkliste, Praxis-Zugang</div>
+          <div class="io-box output"><div class="label">Output</div>Implementierte Medikit-Struktur, geschultes Team</div>
+          <div class="io-box tool"><div class="label">Tools</div>Medikit, Zoom (Remote-Sessions), vor Ort</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane implementiert persönlich — Kernkompetenz ("Die Kunden kommen wegen MIR")</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">6</div>
+      <div class="step-card">
+        <h3>Maßnahmenplan ableiten <span class="tag skill">S03</span></h3>
+        <div class="desc">Aus Beratungsgesprächen konkrete Maßnahmen ableiten, priorisiert nach Dringlichkeit.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Protokolle, Digi-Konzept, Beratungsergebnisse</div>
+          <div class="io-box context"><div class="label">Kontext</div>VORLAGE-Massnahmenplan.md, SOP-Beratungsprozess</div>
+          <div class="io-box output"><div class="label">Output</div>Priorisierter Maßnahmenplan (Markdown/DOCX)</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S03]</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot ki">7</div>
+      <div class="step-card">
+        <h3>Hausaufgaben-E-Mail senden <span class="tag skill">S04</span></h3>
+        <div class="desc">Nach jedem Call: E-Mail mit Action Items an die Praxis. Claude erstellt Entwurf, Juliane prüft.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Protokoll [S01], Maßnahmenplan [S03]</div>
+          <div class="io-box context"><div class="label">Kontext</div>Brand-Voice (Du-Form bei PB), Anrede-Regeln</div>
+          <div class="io-box output"><div class="label">Output</div>E-Mail-Entwurf mit To-Dos, Fristen, nächster Termin</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude [S04], Superchat MCP (alle Kanäle gebündelt)</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane prüft E-Mail, NIEMALS automatischer Versand ohne Freigabe</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-dot human">8</div>
+      <div class="step-card">
+        <h3>Abschluss &amp; Übergabe</h3>
+        <div class="desc">Projekt abschließen, Dokumentation übergeben. Cross-Selling-Moment: Retainer oder Folgeprojekt.</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Output</div>Übergabe-Dokumentation, Testimonial-Anfrage, Retainer-Angebot</div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Retainer anbieten? Cross-Selling zu PF? Testimonial anfragen?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PB: LAUFENDE BETREUUNG -->
+<!-- ============================================================ -->
+<div class="section" id="pb-laufend">
+  <h2><span class="tag pb">PB</span> Laufende Betreuung (Retainer)</h2>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot human">1</div>
+      <div class="step-card">
+        <h3>Retainer-Vereinbarung (185 EUR/h)</h3>
+        <div class="desc">Monatliche Abrechnung, 2-wöchentliche oder monatliche Calls. 8-10 Calls/Woche über alle Kunden.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Tools</div>Lexware (Rechnung), Calendly (Termine), Zoom</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot human">2</div>
+      <div class="step-card">
+        <h3>Regelmäßiger Beratungs-Call <span class="tag" style="background:rgba(255,159,67,0.2);color:var(--human)">HUMAN</span></h3>
+        <div class="desc">Juliane berät per Zoom. Sally.io erstellt Transkript automatisch.</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Output</div>Transkript (Sally.io) + Zoom-Aufzeichnung</div>
+          <div class="io-box tool"><div class="label">Tools</div>Zoom, Sally.io</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">3</div>
+      <div class="step-card">
+        <h3>Protokoll erstellen <span class="tag skill">S01 AKTIV</span></h3>
+        <div class="desc">Transkript → Coaching-Protokoll (DOCX). Sofort nach dem Call — je frischer, desto besser.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Sally.io-Transkript</div>
+          <div class="io-box output"><div class="label">Output</div>DOCX-Protokoll unter kunden/[ordner]/protokolle/</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude Cowork [S01], Python DOCX-Generator</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">4</div>
+      <div class="step-card">
+        <h3>Maßnahmenplan-Update <span class="tag skill">S03</span></h3>
+        <div class="desc">Bestehenden Maßnahmenplan aktualisieren basierend auf neuem Protokoll.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">5</div>
+      <div class="step-card">
+        <h3>Hausaufgaben-E-Mail <span class="tag skill">S04</span></h3>
+        <div class="desc">E-Mail-Entwurf an Praxis mit To-Dos → Juliane prüft → Versand</div>
+        <div class="io-grid">
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>NIEMALS E-Mail versenden ohne Julianes Freigabe</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PF: PRAXIS FACTORY -->
+<!-- ============================================================ -->
+<div class="section" id="pf">
+  <h2><span class="tag pf">PF</span> Praxis Factory — VFD &amp; BAFA</h2>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot auto">1</div>
+      <div class="step-card">
+        <h3>Honorarrechner auf Website → Anfrage</h3>
+        <div class="desc">Lead kommt primär über Steuerberater Andreas Paschhoff oder den Honorarrechner auf praxis-factory.de.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Tools</div>Website praxis-factory.de (WordPress), Honorarrechner</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">2</div>
+      <div class="step-card">
+        <h3>Kundenbriefing <span class="tag skill">S07</span></h3>
+        <div class="desc">Vorbereitung auf VFD-Erstgespräch</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot human">3</div>
+      <div class="step-card">
+        <h3>VFD-Prozess: 4 Termine à 90 Min. <span class="tag skill">S09</span> <span class="tag" style="background:rgba(255,159,67,0.2);color:var(--human)">HUMAN</span></h3>
+        <div class="desc">Juliane führt 4 VFD-Termine via MS Teams + EasyDoku. Protokoll pro Termin.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input pro Termin</div>Tagesordnung [S09], offene Punkte vom letzten Mal</div>
+          <div class="io-box context"><div class="label">Kontext</div>prozessinventar-PF-v2.md, BAFA-Richtlinien</div>
+          <div class="io-box output"><div class="label">Output pro Termin</div>Protokoll [S01], aktualisierter VFD-Status, offene Punkte</div>
+          <div class="io-box tool"><div class="label">Tools</div>MS Teams + EasyDoku, Claude [S09 + S01]</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">4</div>
+      <div class="step-card">
+        <h3>VFD-Dokument fertigstellen</h3>
+        <div class="desc">VFD-Dokument zusammenstellen und finalisieren.</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Output</div>Fertige Verfahrensdokumentation</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane prüft finales Dokument, NIEMALS ohne Review an Kunden</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">5</div>
+      <div class="step-card">
+        <h3>BAFA-Maßnahmenplan <span class="tag skill">S03</span></h3>
+        <div class="desc">BAFA-konformer Maßnahmenplan. BAFA-Beratungsbericht wird durch Kollegin erstellt (bereits delegiert).</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Output</div>BAFA-fähiger Maßnahmenplan, Beratungsbericht (Kollegin)</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane prüft Maßnahmenplan auf BAFA-Konformität</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot auto">6</div>
+      <div class="step-card">
+        <h3>VFD-Update-Service (jährlich) <span class="tag new">CROSS-SELLING</span></h3>
+        <div class="desc">Jährliches Update der VFD. Folgeumsatz. Gleichzeitig Cross-Selling-Moment für PB.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Tools (geplant)</div>n8n Reminder (jährlich), Airtable (Mandats-Tracking)</div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Cross-Selling zu PB Medikit? (aktuell 0% systematisch!)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DF: DR. FLEX / ZEN -->
+<!-- ============================================================ -->
+<div class="section" id="df">
+  <h2><span class="tag df">DF</span> Dr. Flex — ZEN-Konzept &amp; Video-Produktion</h2>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot auto">1</div>
+      <div class="step-card">
+        <h3>ZEN-Anmeldung (349 EUR Einrichtung + 149 EUR/Jahr)</h3>
+        <div class="desc">Dr. Flex Bestandskunden melden sich für ZEN-Konzept an. Willkommenspaket versenden.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">2</div>
+      <div class="step-card">
+        <h3>7 Kapitel sequenziell betreuen <span class="tag skill">S10</span></h3>
+        <div class="desc">Pro Kapitel: HeyGen-Video (Julianes Avatar) + Aufgaben + Check-in Call. 8-12 Wochen Gesamtdauer.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Kapitel-Nummer, Praxis-Status, vorherige Check-in-Ergebnisse</div>
+          <div class="io-box context"><div class="label">Kontext</div>zen-praxis-kontextdokument-DF-v1.md (7 Kapitel komplett dokumentiert)</div>
+          <div class="io-box output"><div class="label">Output pro Kapitel</div>Video-Script, Aufgabenstellung, Check-in-Vorbereitung</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude [S10], HeyGen (Avatar-Video), E-Mail</div>
+        </div>
+        <div style="margin-top:12px;font-size:0.82rem;color:var(--muted)">
+          <strong>Die 7 ZEN-Kapitel:</strong><br>
+          1. Online-Terminvergabe | 2. PVS-Integration | 3. Website-Umbau | 4. KI-Videoproduktion |
+          5. Patientenkommunikation | 6. Veränderung gestalten | 7. Finalisierung + Zertifikat
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot human">3</div>
+      <div class="step-card">
+        <h3>Check-in Calls <span class="tag" style="background:rgba(255,159,67,0.2);color:var(--human)">HUMAN</span></h3>
+        <div class="desc">Juliane führt Check-in-Calls pro Kapitel. Protokoll erstellen.</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Output</div>Protokoll [S01], Fortschritts-Update</div>
+          <div class="io-box tool"><div class="label">Tools</div>Zoom, Claude [S01]</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">4</div>
+      <div class="step-card">
+        <h3>Support-Video-Produktion</h3>
+        <div class="desc">Video-Scripts erstellen → HeyGen-Avatar-Video produzieren → Review durch Dr. Flex → Upload.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Tools</div>Claude [S10], HeyGen, Dr. Flex Plattform</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Dr. Flex gibt Videos frei (externe Freigabe)</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot human">5</div>
+      <div class="step-card">
+        <h3>Abschluss: Prüfung + ZEN-Zertifikat <span class="tag new">CROSS-SELLING</span></h3>
+        <div class="desc">Praxis hat alle 7 Kapitel durchlaufen → Zertifikat. Cross-Selling-Moment zu PB.</div>
+        <div class="io-grid">
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Cross-Selling zu PB empfehlen? (Dr. Flex muss einverstanden sein)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CONTENT & MARKETING -->
+<!-- ============================================================ -->
+<div class="section" id="content">
+  <h2><span style="color:var(--coral)">&#9830;</span> Content-Produktion &amp; Marketing</h2>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot ki">1</div>
+      <div class="step-card">
+        <h3>Instagram-Content planen <span class="tag skill">S05</span></h3>
+        <div class="desc">1x/Woche: 3 Posts planen. PB (Juliane persönlich) und/oder WS (Waldorfschule).</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Themenvorschläge, aktuelle Praxis-Themen, saisonale Anlässe</div>
+          <div class="io-box context"><div class="label">Kontext</div>brandvoice-JH-v3.md, Brand-Voice-PB-V2.md (Schieferblau, Koralle)</div>
+          <div class="io-box output"><div class="label">Output</div>Beitragstexte, Bildideen (Canva), Hashtags, Posting-Zeiten</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude [S05], Canva MCP (Grafik), Instagram</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>Juliane prüft Texte + Bilder vor Posting</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot auto">2</div>
+      <div class="step-card">
+        <h3>Content-Automatisierung <span class="tag new">GEPLANT</span> <span class="tag auto-tag">n8n</span></h3>
+        <div class="desc">Aus Beratungswissen automatisch Content-Ideen generieren. "Praxistipps aus vorhandenem Wissen".</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Protokolle, Maßnahmenpläne, FAQ-Themen aus Kundengesprächen</div>
+          <div class="io-box output"><div class="label">Output</div>Content-Pipeline mit vorgeschlagenen Posts</div>
+          <div class="io-box tool"><div class="label">Tools (geplant)</div>n8n (Trigger: neues Protokoll → Content-Vorschlag), Claude, Airtable (Content-Kalender)</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">3</div>
+      <div class="step-card">
+        <h3>HeyGen-Video-Content <span class="tag new">GEPLANT</span></h3>
+        <div class="desc">Juliane will KI-generierte Videos statt selbst vor der Kamera stehen. HeyGen-Avatar als "digitale Juliane".</div>
+        <div class="io-grid">
+          <div class="io-box context"><div class="label">Julianes Aussage</div>"Wenn ich das alles per KI machen könnte, ohne mein ganzes Setup aufzubauen, würde ich das sofort machen."</div>
+          <div class="io-box tool"><div class="label">Tools</div>HeyGen (Avatar), Claude (Script), Canva (Thumbnails)</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot auto">4</div>
+      <div class="step-card">
+        <h3>Testimonial-Sammlung automatisieren <span class="tag new">GEPLANT</span></h3>
+        <div class="desc">Nach Projektabschluss automatisch Testimonial-Anfrage senden. Aktuell: 5 passiv auf Website.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Tools (geplant)</div>n8n (Trigger: Projekt-Status = abgeschlossen), E-Mail-Template, Airtable</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">5</div>
+      <div class="step-card">
+        <h3>Lead Magnet entwickeln <span class="tag new">PHASE 3</span></h3>
+        <div class="desc">Freebies zum Download als Lead-Generierung. Aktuell: FEHLT komplett.</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Vorschläge</div>
+            "Die 10 häufigsten Onboarding-Fehler" (PDF) |
+            "Checkliste Ersteinarbeitung Empfang" |
+            "Ist Ihre Praxis GoBD-konform?" (Quiz/PDF für PF)
+          </div>
+          <div class="io-box human-loop"><div class="label">Julianes Entscheidung</div>Welches Freebie zuerst? Für PB oder PF?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- E-MAIL & NEWSLETTER -->
+<!-- ============================================================ -->
+<div class="section" id="email">
+  <h2><span style="color:var(--ki)">&#9993;</span> E-Mail-Management &amp; Newsletter</h2>
+
+  <div class="flow">
+    <div class="step">
+      <div class="step-dot human" style="background:var(--red)">!</div>
+      <div class="step-card" style="border-left:4px solid var(--red)">
+        <h3>IST: 13 E-Mail-Postfächer = Größter Zeitfresser</h3>
+        <div class="desc">45-60 Min/Tag manuelles Durchscannen. Juliane: "größter Zeitfresser". Todoist per Drag&amp;Drop für To-Dos.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Aktuelle Tools</div>iCloud Mail (hallo@juliane-hoffmann.de), 13 Postfächer, Todoist</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot auto">1</div>
+      <div class="step-card">
+        <h3>Quick Win: E-Mail-Regeln einrichten <span class="tag new">PHASE 1</span></h3>
+        <div class="desc">Newsletter-Benachrichtigungen abschalten, Sortierregeln, Ordnerstruktur. Geschätzt: 15-30 Min/Tag Ersparnis.</div>
+        <div class="io-grid">
+          <div class="io-box tool"><div class="label">Tools</div>Mail-App (Regeln), n8n (geplant: intelligente Sortierung)</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot ki">2</div>
+      <div class="step-card">
+        <h3>KI-E-Mail-Management <span class="tag skill">S04</span></h3>
+        <div class="desc">Claude erstellt E-Mail-Entwürfe, Follow-ups, Antwortvorschläge. Berücksichtigt Anrede (Du/Sie) pro Bereich.</div>
+        <div class="io-grid">
+          <div class="io-box context"><div class="label">Anrede-Regeln</div>PB Website: Sie | PB Gespräch: Du | PF: immer Sie | DF intern: Du | DF Patienten: Du</div>
+          <div class="io-box tool"><div class="label">Tools</div>Claude [S04], Superchat MCP (alle Kanäle gebündelt)</div>
+          <div class="io-box human-loop"><div class="label">Human-in-the-Loop</div>NIEMALS E-Mails versenden ohne Julianes explizite Freigabe</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot auto">3</div>
+      <div class="step-card">
+        <h3>Follow-up-E-Mail-Sequenz <span class="tag new">PHASE 3</span> <span class="tag auto-tag">n8n</span></h3>
+        <div class="desc">Automatisierte E-Mail-Sequenz nach Erstgespräch. Aktuell: FEHLT komplett (Interview bestätigt).</div>
+        <div class="io-grid">
+          <div class="io-box output"><div class="label">Sequenz</div>Tag 3: Nachfrage → Tag 7: Mehrwert (Case Study/Tipp) → Tag 14: Letzte Chance</div>
+          <div class="io-box tool"><div class="label">Tools (geplant)</div>n8n Automation, E-Mail-Marketing-Tool (tbd), Airtable (Lead-Status)</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-dot auto">4</div>
+      <div class="step-card">
+        <h3>Newsletter / E-Mail-Serie <span class="tag new">PHASE 3</span> <span class="tag auto-tag">n8n</span></h3>
+        <div class="desc">Automatisierter Newsletter mit Praxistipps. Lead Nurturing nach Freebie-Download. Aktuell: FEHLT.</div>
+        <div class="io-grid">
+          <div class="io-box input"><div class="label">Input</div>Lead Magnet Download → automatische Willkommens-Serie</div>
+          <div class="io-box output"><div class="label">Output</div>Wöchentliche/monatliche E-Mail mit Praxistipps, Case Studies, Angebote</div>
+          <div class="io-box tool"><div class="label">Tools (geplant)</div>n8n (Sequenz-Steuerung), E-Mail-Tool (Mailerlite/Brevo/ActiveCampaign), Claude (Content)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DIGITALE PRODUKTE -->
+<!-- ============================================================ -->
+<div class="section" id="produkte">
+  <h2><span style="color:var(--lime)">&#9733;</span> Digitale Produkte (Phase 4)</h2>
+
+  <div class="strat-grid">
+    <div class="strat-card" style="border-left-color:var(--lime)">
+      <h3>1. FAQ-Videokurs mit HeyGen <span class="tag new">JULIANES PRÄFERENZ</span></h3>
+      <div class="impact">Zahnarztpraxen lernen, FAQ-Videos mit KI-Avataren für ihre Homepage zu erstellen</div>
+      <ul>
+        <li><strong>Zielgruppe:</strong> Zahnarztpraxen, die Empfang entlasten wollen</li>
+        <li><strong>Format:</strong> Online-Videokurs (HeyGen-basiert)</li>
+        <li><strong>Preis:</strong> Noch offen (geschätzt 500-2.000 EUR)</li>
+        <li><strong>Tools:</strong> HeyGen, Claude [S11], Kursplattform</li>
+        <li><strong>Juliane:</strong> "Wenn ich das mit KI machen könnte, würde ich das sofort machen."</li>
+      </ul>
+    </div>
+    <div class="strat-card" style="border-left-color:var(--ki)">
+      <h3>2. Interaktiver Chatbot als Monats-Abo</h3>
+      <div class="impact">Follow-up-Produkt zum Videokurs. Praxen zahlen ~50 EUR/Monat für gehosteten FAQ-Chatbot.</div>
+      <ul>
+        <li><strong>Format:</strong> SaaS / Monats-Abo</li>
+        <li><strong>Preis:</strong> ~50 EUR/Monat (wiederkehrend)</li>
+        <li><strong>90% der Praxen</strong> werden Selbstbau nicht schaffen → Chatbot-Service ist das Upselling</li>
+        <li><strong>Tools:</strong> Chatbot-Builder, KI-Backend, Hosting</li>
+      </ul>
+    </div>
+    <div class="strat-card" style="border-left-color:var(--coral)">
+      <h3>3. Unternehmensregeln-Generator <span class="tag skill">S13</span></h3>
+      <div class="impact">Fragebogen → automatisch generiertes Regelwerk. Skalierbar, passiv.</div>
+      <ul>
+        <li><strong>Format:</strong> Online-Tool / PDF-Generator</li>
+        <li><strong>Preis:</strong> 49-149 EUR (geschätzt)</li>
+        <li><strong>Tools:</strong> Claude [S13], Web-Formular, PDF-Generator</li>
+      </ul>
+    </div>
+    <div class="strat-card" style="border-left-color:var(--mint)">
+      <h3>4. Dr. Flex Affiliate-Deal</h3>
+      <div class="impact">Provision für Dr. Flex-Neukunden, die über Julianes Kurs/Beratung kommen.</div>
+      <ul>
+        <li><strong>Status:</strong> Noch nicht besprochen mit Dr. Flex</li>
+        <li><strong>Potenzial:</strong> Monatliche Provision pro vermitteltem Kunden</li>
+        <li><strong>Juliane:</strong> "Von der Seite haben wir es noch gar nicht gesehen"</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PRODUKTTREPPE -->
+<!-- ============================================================ -->
+<div class="section" id="produkttreppe">
+  <h2><span style="color:var(--lime)">&#9650;</span> Produkttreppe (SOLL-Zustand)</h2>
+
+  <div class="ladder">
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(var(--gold),var(--coral));border-radius:10px 0 0 0;">S7</div>
+      <div class="ladder-content" style="border-radius:0 10px 0 0;">
+        <h4>Retainer / Freie Mitarbeit</h4>
+        <div class="price">ab 185 EUR/h (monatlich)</div>
+        <div class="detail">PB: Laufende Betreuung, 2-wöchentliche Calls, Medikit-Pflege</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(var(--coral),#D44);">S6</div>
+      <div class="ladder-content">
+        <h4>Medikit Elite + Jahresbetreuung</h4>
+        <div class="price">17.000-18.500 EUR netto</div>
+        <div class="detail">PB: Vollpaket mit Special Support (HR, PM, Onboarding, Offboarding) + Vor-Ort</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(#D44,var(--coral));">S5</div>
+      <div class="ladder-content">
+        <h4>Medikit Profi + QM-Videos</h4>
+        <div class="price">10.500 EUR netto</div>
+        <div class="detail">PB: + Vorlagen, Sichtrechte, Schulungsvideo</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(var(--coral),var(--teal));">S4</div>
+      <div class="ladder-content">
+        <h4>Medikit Starter <em>oder</em> VFD + BAFA</h4>
+        <div class="price">PB: 8.500 EUR | PF: via Honorarrechner</div>
+        <div class="detail">PB: Organigramm + Grundstruktur | PF: Verfahrensdokumentation (4 Termine)</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(var(--teal),var(--ki));">S3</div>
+      <div class="ladder-content" style="border-left: 3px dashed var(--lime);">
+        <h4>Digitale Produkte <span class="tag new">NEU — PHASE 4</span></h4>
+        <div class="price">Preis tbd</div>
+        <div class="detail">FAQ-Videokurs (HeyGen), Chatbot-Abo (~50 EUR/Monat), Unternehmensregeln-Generator (49-149 EUR)</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(var(--ki),var(--mcp));">S2</div>
+      <div class="ladder-content">
+        <h4>Einzelne Beratungsstunde</h4>
+        <div class="price">185 EUR netto/h</div>
+        <div class="detail">PB: Zoom-Call, ad-hoc Beratung</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:linear-gradient(var(--mcp),var(--lime));">S1</div>
+      <div class="ladder-content" style="border-left: 3px dashed var(--lime);">
+        <h4>Lead Magnet + E-Mail-Serie <span class="tag new">NEU — PHASE 3</span></h4>
+        <div class="price">Kostenlos</div>
+        <div class="detail">Freebie (PDF/Quiz), Willkommens-E-Mail-Serie, Newsletter</div>
+      </div>
+    </div>
+    <div class="ladder-step">
+      <div class="ladder-bar" style="background:var(--lime);border-radius:0 0 0 10px;">S0</div>
+      <div class="ladder-content" style="border-radius:0 0 10px 0;">
+        <h4>Awareness: Webinar / Social Media / Empfehlung</h4>
+        <div class="price">Kostenlos</div>
+        <div class="detail">Webinare, Instagram, Podcast, Mundpropaganda, Christina Fritz, Dr. Flex ZEN</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CROSS-SELLING -->
+<!-- ============================================================ -->
+<div class="section" id="crossselling">
+  <h2><span style="color:var(--lime)">&#8644;</span> Cross-Selling-Pfade</h2>
+
+  <div class="cross-paths">
+    <div class="cross-card high">
+      <h3>Pfad 1: VFD → Medikit <span class="tag pf">PF</span> → <span class="tag pb">PB</span></h3>
+      <div class="path-flow">
+        <span class="path-node">VFD abgeschlossen</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Strukturbedarf erkannt</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Medikit Starter/Profi</span>
+      </div>
+      <div class="potential"><strong>Potenzial: HOCH</strong> — 5 aktive VFD-Mandate, aktuell 0% systematisch genutzt!</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:8px"><strong>Trigger:</strong> VFD-Abschlussgespräch, Praxis äußert "mehr Struktur"</div>
+    </div>
+
+    <div class="cross-card high">
+      <h3>Pfad 2: Medikit → Retainer <span class="tag pb">PB</span> → <span class="tag pb">PB</span></h3>
+      <div class="path-flow">
+        <span class="path-node">Medikit-Projekt abgeschlossen</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Laufende Betreuung</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Retainer (185 EUR/h)</span>
+      </div>
+      <div class="potential"><strong>Potenzial: SEHR HOCH</strong> — Natürliche Fortsetzung, 3 Abgänge in 1,5 Jahren (niedrig)</div>
+    </div>
+
+    <div class="cross-card medium">
+      <h3>Pfad 3: BAFA → Medikit <span class="tag pf">PF</span> → <span class="tag pb">PB</span></h3>
+      <div class="path-flow">
+        <span class="path-node">BAFA-Bericht erstellt</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Maßnahmenplan enthält Digi-Empfehlung</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Medikit-Angebot</span>
+      </div>
+      <div class="potential"><strong>Potenzial: MITTEL</strong> — Abhängig von BAFA-Volumen</div>
+    </div>
+
+    <div class="cross-card medium">
+      <h3>Pfad 4: ZEN → Beratung <span class="tag df">DF</span> → <span class="tag pb">PB</span></h3>
+      <div class="path-flow">
+        <span class="path-node">ZEN durchlaufen</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">Weiter optimieren</span>
+        <span class="path-arrow">→</span>
+        <span class="path-node">PB Erstgespräch</span>
+      </div>
+      <div class="potential"><strong>Potenzial: MITTEL</strong> — Dr. Flex muss einverstanden sein</div>
+    </div>
+
+    <div class="cross-card medium">
+      <h3>Pfad 5: Christina Fritz <span class="tag pb">PB</span> ↔ <span class="tag pb">PB</span></h3>
+      <div class="path-flow">
+        <span class="path-node">Christina: Teamcoaching</span>
+        <span class="path-arrow">↔</span>
+        <span class="path-node">Juliane: Prozesse/Struktur</span>
+      </div>
+      <div class="potential"><strong>Komplementäre Partnerschaft</strong> — gegenseitige Empfehlungen, kein formeller Vertrag</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- AUTOMATIONS -->
+<!-- ============================================================ -->
+<div class="section" id="automations">
+  <h2><span style="color:var(--auto)">&#9881;</span> n8n Automationen &amp; Airtable</h2>
+
+  <table class="auto-table">
+    <thead>
+      <tr>
+        <th>Automation</th>
+        <th>Trigger</th>
+        <th>Aktion</th>
+        <th>Tools</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Lead-Eingang → CRM-Eintrag</strong></td>
+        <td>Neue Calendly-Buchung oder Website-Formular</td>
+        <td>Lead in Airtable anlegen, Bestätigungs-E-Mail, Todoist-Task</td>
+        <td>n8n, Airtable, Calendly, E-Mail</td>
+        <td><span class="status-dot planned"></span> Geplant (P2)</td>
+      </tr>
+      <tr>
+        <td><strong>Follow-up nach Erstgespräch</strong></td>
+        <td>Erstgespräch-Datum + 3/7/14 Tage</td>
+        <td>Automatische E-Mail-Sequenz (Claude-generierte Entwürfe)</td>
+        <td>n8n, E-Mail-Tool, Airtable</td>
+        <td><span class="status-dot planned"></span> Geplant (P3)</td>
+      </tr>
+      <tr>
+        <td><strong>Protokoll → Content-Vorschlag</strong></td>
+        <td>Neues Protokoll im Kundenordner erstellt</td>
+        <td>Claude extrahiert Praxistipps → Content-Vorschlag in Airtable</td>
+        <td>n8n, Claude API, Airtable (Content-Kalender)</td>
+        <td><span class="status-dot idea"></span> Idee</td>
+      </tr>
+      <tr>
+        <td><strong>Testimonial-Anfrage automatisch</strong></td>
+        <td>Projekt-Status in Airtable = "Abgeschlossen"</td>
+        <td>Personalisierte Testimonial-Anfrage per E-Mail</td>
+        <td>n8n, Airtable, E-Mail-Template</td>
+        <td><span class="status-dot planned"></span> Geplant (P3)</td>
+      </tr>
+      <tr>
+        <td><strong>VFD-Update-Reminder (jährlich)</strong></td>
+        <td>VFD-Abschluss + 11 Monate</td>
+        <td>Erinnerungs-E-Mail an Praxis + Juliane (Todoist)</td>
+        <td>n8n, Airtable (Mandats-Tracking), E-Mail</td>
+        <td><span class="status-dot planned"></span> Geplant (P2)</td>
+      </tr>
+      <tr>
+        <td><strong>Newsletter-Versand</strong></td>
+        <td>Wöchentlich/Monatlich (Zeitplan)</td>
+        <td>Claude generiert Content → Juliane prüft → Versand</td>
+        <td>n8n, E-Mail-Marketing-Tool, Claude</td>
+        <td><span class="status-dot planned"></span> Geplant (P3)</td>
+      </tr>
+      <tr>
+        <td><strong>Lead Magnet → Willkommens-Serie</strong></td>
+        <td>Freebie-Download auf Website</td>
+        <td>5-teilige E-Mail-Serie über 14 Tage</td>
+        <td>n8n, E-Mail-Tool, Website-Formular</td>
+        <td><span class="status-dot planned"></span> Geplant (P3)</td>
+      </tr>
+      <tr>
+        <td><strong>E-Mail-Intelligente-Sortierung</strong></td>
+        <td>Eingehende E-Mail in einem der 13 Postfächer</td>
+        <td>KI-Kategorisierung, Priorität setzen, Todoist-Task bei Aktion nötig</td>
+        <td>n8n, Claude API, Todoist, Superchat</td>
+        <td><span class="status-dot idea"></span> Idee (P1/P2)</td>
+      </tr>
+      <tr>
+        <td><strong>Airtable CRM-Dashboard</strong></td>
+        <td>—</td>
+        <td>Zentrale Kundenübersicht: Status, letzter Kontakt, offene Action Items, nächster Schritt</td>
+        <td>Airtable (Bases: Leads, Kunden, Projekte, Content)</td>
+        <td><span class="status-dot planned"></span> Geplant (P2)</td>
+      </tr>
+      <tr>
+        <td><strong>Cross-Selling-Alert</strong></td>
+        <td>VFD-Mandat oder ZEN abgeschlossen</td>
+        <td>Juliane erhält Erinnerung: "Medikit-Beratung vorschlagen?"</td>
+        <td>n8n, Airtable, Todoist</td>
+        <td><span class="status-dot idea"></span> Idee (P2)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-bottom:16px;color:var(--teal)">Airtable-Struktur (geplant)</h3>
+  <div class="strat-grid">
+    <div class="strat-card" style="border-left-color:var(--mcp)">
+      <h3>Base: Leads &amp; Kunden</h3>
+      <ul>
+        <li>Name, Praxis, Bereich (PB/PF/DF)</li>
+        <li>Status: Lead → Erstgespräch → Angebot → Kunde → Retainer</li>
+        <li>Letzter Kontakt, nächster Schritt</li>
+        <li>Paketstufe, Umsatz</li>
+      </ul>
+    </div>
+    <div class="strat-card" style="border-left-color:var(--mcp)">
+      <h3>Base: Projekte</h3>
+      <ul>
+        <li>Projekt-Typ (Medikit/VFD/ZEN)</li>
+        <li>Status, Start, Ende</li>
+        <li>Offene Action Items</li>
+        <li>Stunden/Abrechnung</li>
+      </ul>
+    </div>
+    <div class="strat-card" style="border-left-color:var(--mcp)">
+      <h3>Base: Content-Kalender</h3>
+      <ul>
+        <li>Post-Idee, Bereich, Plattform</li>
+        <li>Status: Idee → Entwurf → Freigegeben → Gepostet</li>
+        <li>Posting-Datum, Hashtags</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TOOLS & MCP -->
+<!-- ============================================================ -->
+<div class="section" id="tools">
+  <h2><span style="color:var(--mcp)">&#9881;</span> Tools &amp; MCP-Server</h2>
+
+  <h3 style="margin-bottom:16px;color:var(--lime)">Aktive Tools</h3>
+  <div class="tool-grid">
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(84,160,255,0.2)">&#129302;</div>
+      <div>
+        <h4>Claude Cowork / Desktop</h4>
+        <div class="tool-desc">Zentrale KI-Assistentin. Liest CLAUDE.md, kennt alle 6 Bereiche, 38 Basisdokumente, 13 Skills.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(156,202,54,0.2)">&#128193;</div>
+      <div>
+        <h4>Dateisystem MCP</h4>
+        <div class="tool-desc">Lokaler Zugriff auf 04_KI-Arbeitsumgebung. Basisdokumente, Kundenordner, Skills.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv (Claude Desktop)</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(78,205,196,0.2)">&#127912;</div>
+      <div>
+        <h4>Canva MCP</h4>
+        <div class="tool-desc">Grafik-Produktion nach Brand Guide. Instagram-Posts, Dokument-Design.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv (Claude Desktop)</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(232,115,90,0.2)">&#127760;</div>
+      <div>
+        <h4>Chrome Control MCP</h4>
+        <div class="tool-desc">Browser-Steuerung. Website-Analyse für Kundenbriefings [S07], Research.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv (Claude Desktop)</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(84,160,255,0.15)">&#128249;</div>
+      <div>
+        <h4>Zoom + AI Companion</h4>
+        <div class="tool-desc">Video-Calls + automatische Zusammenfassung. 8-10 Calls/Woche.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(156,202,54,0.2)">&#128196;</div>
+      <div>
+        <h4>Sally.io</h4>
+        <div class="tool-desc">Transkription aller Zoom-Calls. Liefert strukturierte Transkripte als Input für Protokoll-Skill [S01].</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv (fix)</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(212,168,67,0.2)">&#128176;</div>
+      <div>
+        <h4>Lexware (lexoffice)</h4>
+        <div class="tool-desc">Rechnungen, Angebote, Auftragsbestätigungen, Buchhaltung.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(156,202,54,0.15)">&#128203;</div>
+      <div>
+        <h4>Medikit</h4>
+        <div class="tool-desc">QM-Tool für Kunden. Organigramm, Vorlagen, Sichtrechte, interne Kommunikation.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv (Kernexpertise)</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(95,39,205,0.15)">&#9989;</div>
+      <div>
+        <h4>Todoist</h4>
+        <div class="tool-desc">Aufgabenverwaltung. E-Mails → To-Dos per Drag&amp;Drop.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(78,205,196,0.15)">&#128197;</div>
+      <div>
+        <h4>Calendly</h4>
+        <div class="tool-desc">Erstgespräch-Buchung. Automatisch Zoom/Meet Link.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv</div>
+      </div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(232,115,90,0.15)">&#127916;</div>
+      <div>
+        <h4>HeyGen</h4>
+        <div class="tool-desc">KI-Avatar-Videos. Julianes eigener Avatar bei Dr. Flex. ZEN-Support-Videos.</div>
+        <div class="tool-status"><span class="status-dot active"></span> Aktiv</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin:24px 0 16px;color:var(--gold)">Geplante Tools &amp; MCP-Server</h3>
+  <div class="tool-grid">
+    <div class="tool-card" style="border:1px dashed var(--gold)">
+      <div class="tool-icon" style="background:rgba(78,205,196,0.2)">&#128172;</div>
+      <div>
+        <h4>Superchat MCP</h4>
+        <div class="tool-desc">Bündelt alle Kommunikationskanäle (WhatsApp, E-Mail, Instagram DMs, Website-Chat) in einer DSGVO-konformen Oberfläche. MCP-Anbindung für Claude-Zugriff auf alle Konversationen. Ersetzt separates Mac Mail MCP.</div>
+        <div class="tool-status"><span class="status-dot planned"></span> Geplant</div>
+      </div>
+    </div>
+    <div class="tool-card" style="border:1px dashed var(--lime)">
+      <div class="tool-icon" style="background:rgba(156,202,54,0.2)">&#9989;</div>
+      <div>
+        <h4>Todoist MCP</h4>
+        <div class="tool-desc">Todoist ist aktiv im Einsatz. MCP-Anbindung ermöglicht Claude direkten Zugriff: Aufgaben lesen, erstellen, erledigen. Todoist bleibt neben Airtable als To-Do-System.</div>
+        <div class="tool-status"><span class="status-dot planned"></span> Vorhanden — MCP-Anbindung ausstehend</div>
+      </div>
+    </div>
+    <div class="tool-card" style="border:1px dashed var(--gold)">
+      <div class="tool-icon" style="background:rgba(212,168,67,0.2)">&#128202;</div>
+      <div>
+        <h4>Airtable (CRM-Ersatz)</h4>
+        <div class="tool-desc">Leads, Kunden, Projekte, Content-Kalender. Kein CRM vorhanden (Interview bestätigt).</div>
+        <div class="tool-status"><span class="status-dot planned"></span> Geplant (P2)</div>
+      </div>
+    </div>
+    <div class="tool-card" style="border:1px dashed var(--gold)">
+      <div class="tool-icon" style="background:rgba(212,168,67,0.2)">&#9881;</div>
+      <div>
+        <h4>n8n (Automationen)</h4>
+        <div class="tool-desc">Workflow-Automatisierung: Follow-ups, Newsletter, Testimonials, Cross-Selling-Alerts.</div>
+        <div class="tool-status"><span class="status-dot planned"></span> Geplant (P2-P3)</div>
+      </div>
+    </div>
+    <div class="tool-card" style="border:1px dashed var(--gold)">
+      <div class="tool-icon" style="background:rgba(212,168,67,0.2)">&#128231;</div>
+      <div>
+        <h4>E-Mail-Marketing-Tool</h4>
+        <div class="tool-desc">Newsletter, Willkommens-Serien, Lead-Nurturing. Mailerlite, Brevo oder ActiveCampaign.</div>
+        <div class="tool-status"><span class="status-dot planned"></span> Geplant (P3)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- BLOCKADEN & LÖSUNGEN -->
+<!-- ============================================================ -->
+<div class="section" id="blockaden">
+  <h2><span style="color:var(--red)">&#9888;</span> Blockaden &amp; Lösungen</h2>
+
+  <div class="blockade-grid">
+    <div class="blockade-card solved">
+      <h4>B1: 13 E-Mail-Postfächer — größter Zeitfresser</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">45-60 Min/Tag manuell | Impact: HOCH | Alle Bereiche</div>
+      <div class="solution">Lösung: E-Mail-Regeln (P1, Quick Win) + KI-Sortierung (P2) + Superchat MCP (alle Kanäle bündeln)</div>
+    </div>
+    <div class="blockade-card solved">
+      <h4>B2: Kein standardisierter Protokoll-Workflow</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">30-60 Min/Call "das Rad neu erfinden" | Impact: HOCH | PB, PF, AB</div>
+      <div class="solution">Lösung: Coaching-Protokoll-Skill [S01] — AKTIV! Python + DOCX Dual-Brand</div>
+    </div>
+    <div class="blockade-card solved">
+      <h4>B3: Keine Basisdokumente — alles im Kopf</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">Qualität schwankt, Context-Switching | Impact: HOCH | Alle</div>
+      <div class="solution">Lösung: 38 Basisdokumente + CLAUDE.md erstellt — ERLEDIGT!</div>
+    </div>
+    <div class="blockade-card">
+      <h4>B4: Solo-Modell = Kapazitätsdecke (24-30h/Woche)</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">Keine Mitarbeiter gewünscht | Impact: MITTEL | Alle</div>
+      <div class="solution">Lösung: KI als "virtuelle Mitarbeiterin" + digitale Produkte (passives Einkommen)</div>
+    </div>
+    <div class="blockade-card">
+      <h4>B5: Kein Funnel — nur Webinare + Mundpropaganda</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">Keine Lead Magnets, kein Nurturing | Impact: MITTEL | PB, PF</div>
+      <div class="solution">Lösung: Lead Magnet → E-Mail-Serie → Erstgespräch (Phase 3)</div>
+    </div>
+    <div class="blockade-card">
+      <h4>B6: Social Media vernachlässigt</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">"Keine Zeit", "Macht keinen Fun" | Impact: MITTEL | PF, DF, WS</div>
+      <div class="solution">Lösung: KI-Content [S05], HeyGen-Videos, Content-Automatisierung (n8n)</div>
+    </div>
+    <div class="blockade-card">
+      <h4>B7: Kein CRM</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">Kundenüberblick fehlt (Interview bestätigt) | Impact: MITTEL | PB, PF</div>
+      <div class="solution">Lösung: Airtable als leichtgewichtiges CRM (Phase 2)</div>
+    </div>
+    <div class="blockade-card">
+      <h4>B8: Tool-Fragmentierung (12+ Tools)</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">Keine Integration zwischen Tools | Impact: MITTEL | Alle</div>
+      <div class="solution">Lösung: n8n als Integrations-Hub, Superchat (Kommunikationskanäle bündeln), Todoist (To-Dos), MCP-Server für Claude-Anbindung</div>
+    </div>
+    <div class="blockade-card">
+      <h4>B9: Kein Follow-up-Prozess</h4>
+      <div style="font-size:0.85rem;color:var(--muted)">Nach Erstgespräch kein Nachfassen (bestätigt) | Impact: MITTEL | PB</div>
+      <div class="solution">Lösung: Automatisierte E-Mail-Sequenz via n8n (Phase 3)</div>
+    </div>
+  </div>
+
+  <h3 style="margin:24px 0 16px;color:var(--teal)">Quick Wins (sofort umsetzbar)</h3>
+  <table class="auto-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Quick Win</th>
+        <th>Zeitersparnis</th>
+        <th>Setup-Aufwand</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>QW1</td><td>E-Mail-Regeln + Newsletter abschalten</td><td>15-30 Min/Tag</td><td>2h</td></tr>
+      <tr><td>QW2</td><td>Protokoll-Skill [S01] nutzen</td><td>30-60 Min/Call</td><td>Fertig!</td></tr>
+      <tr><td>QW3</td><td>Master Prompt Digitalisierungskonzept</td><td>30-60 Min/Kunde</td><td>3h</td></tr>
+      <tr><td>QW4</td><td>Master Prompt Maßnahmenplan (PF)</td><td>15-30 Min/Mandant</td><td>2h</td></tr>
+      <tr><td>QW5</td><td>Stundensatz 185 EUR für Neukunden</td><td>Sofortige Umsatzsteigerung</td><td>0h (beschlossen)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Find matching button
+  const buttons = document.querySelectorAll('.nav button');
+  buttons.forEach(b => {
+    if (b.getAttribute('onclick').includes("'" + id + "'")) b.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+</script>
+
+</body>
+</html>
