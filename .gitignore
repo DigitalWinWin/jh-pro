@@ -1,0 +1,20 @@
+# Environment & secrets
+.env
+.env.*
+*.local
+
+# Local settings
+.claude/settings.local.json
+
+# System files
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+Thumbs.db
+nul
+
+# Temporary files
+*.tmp
+~$*
+__MACOSX/
