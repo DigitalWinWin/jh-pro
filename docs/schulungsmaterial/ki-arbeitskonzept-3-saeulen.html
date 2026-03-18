@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KI-Arbeitskonzept — Die 3 Säulen</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Varela+Round&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: #F5F0E8;
+    color: #2C3E50;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .poster {
+    width: 100%;
+    max-width: 800px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(74, 98, 116, 0.15);
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #4A6274 0%, #3A5264 100%);
+    color: white;
+    padding: 48px 40px 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 20px solid #3A5264;
+  }
+
+  .header h1 {
+    font-family: 'Varela Round', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .header .subtitle {
+    font-size: 16px;
+    opacity: 0.8;
+    font-weight: 400;
+  }
+
+  .header .date {
+    font-size: 13px;
+    opacity: 0.5;
+    margin-top: 8px;
+  }
+
+  /* Pillars */
+  .pillars {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    padding: 40px 24px 24px;
+  }
+
+  .pillar {
+    padding: 24px 20px;
+    border-radius: 16px;
+    margin: 0 6px;
+    position: relative;
+  }
+
+  .pillar-1 { background: linear-gradient(180deg, #EEF4F7 0%, #E3ECF1 100%); }
+  .pillar-2 { background: linear-gradient(180deg, #FDF0EC 0%, #FADED6 100%); }
+  .pillar-3 { background: linear-gradient(180deg, #F5F3EE 0%, #EDE9E0 100%); }
+
+  .pillar-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .pillar-1 .pillar-icon { background: #4A6274; color: white; }
+  .pillar-2 .pillar-icon { background: #E8735A; color: white; }
+  .pillar-3 .pillar-icon { background: #8B7355; color: white; }
+
+  .pillar-number {
+    font-family: 'Varela Round', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    opacity: 0.5;
+  }
+
+  .pillar h2 {
+    font-family: 'Varela Round', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  .pillar-1 h2 { color: #4A6274; }
+  .pillar-2 h2 { color: #D4654C; }
+  .pillar-3 h2 { color: #8B7355; }
+
+  .pillar ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .pillar li {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .pillar li:last-child { border-bottom: none; }
+
+  .pillar-1 li::before { content: ''; position: absolute; left: 0; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: #4A6274; }
+  .pillar-2 li::before { content: ''; position: absolute; left: 0; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: #E8735A; }
+  .pillar-3 li::before { content: ''; position: absolute; left: 0; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: #8B7355; }
+
+  .pillar .metaphor {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .pillar-1 .metaphor { background: rgba(74, 98, 116, 0.1); color: #4A6274; }
+  .pillar-2 .metaphor { background: rgba(232, 115, 90, 0.1); color: #D4654C; }
+  .pillar-3 .metaphor { background: rgba(139, 115, 85, 0.1); color: #8B7355; }
+
+  /* Flow Section */
+  .flow {
+    padding: 8px 30px 24px;
+  }
+
+  .flow-box {
+    background: linear-gradient(135deg, #4A6274 0%, #3A5264 100%);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .flow-step {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .flow-arrow {
+    color: #E8735A;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 20px 30px 28px;
+    text-align: center;
+  }
+
+  .footer .quote {
+    font-family: 'Varela Round', sans-serif;
+    font-size: 16px;
+    color: #4A6274;
+    line-height: 1.5;
+    padding: 20px;
+    background: #F5F0E8;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .footer .meta {
+    font-size: 12px;
+    color: #999;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .pillars { grid-template-columns: 1fr; }
+    .pillar { margin: 6px 0; }
+    .header h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="poster">
+
+  <div class="header">
+    <h1>KI-Arbeitskonzept &mdash; Die 3 Säulen</h1>
+    <div class="subtitle">Praxisschulung Juliane Hoffmann</div>
+    <div class="date">17. März 2026 &middot; Digital WinWin</div>
+  </div>
+
+  <div class="pillars">
+
+    <div class="pillar pillar-1">
+      <div class="pillar-icon">&#128218;</div>
+      <div class="pillar-number">Säule 1</div>
+      <h2>Kontext&shy;engineering</h2>
+      <ul>
+        <li><strong>CLAUDE.md</strong> = Projektanweisung (sagt der KI, wer du bist)</li>
+        <li><strong>Basisdokumente</strong> = dein Fachwissen als Kontext</li>
+        <li><strong>Ordnerstruktur</strong> = Projektwissen (Kunden, Skills, Vorlagen)</li>
+        <li>Kontextdaten <strong>aktuell halten</strong> &mdash; nicht zumüllen</li>
+        <li><strong>Markdown-Format</strong> gibt Struktur (wie Überschriften in Word)</li>
+      </ul>
+      <div class="metaphor">
+        &laquo;Die Mappe, die du einem neuen Mitarbeiter mitgibst.&raquo;
+      </div>
+    </div>
+
+    <div class="pillar pillar-2">
+      <div class="pillar-icon">&#9881;</div>
+      <div class="pillar-number">Säule 2</div>
+      <h2>Skill&shy;erstellung</h2>
+      <ul>
+        <li><strong>Skill</strong> = wiederholbarer Prozess (wie eine Checkliste)</li>
+        <li>Besteht aus: <strong>SKILL.md</strong> + References + Assets</li>
+        <li>Erstellen via <strong>Skill Creator</strong> in Claude</li>
+        <li>Iterativ: testen &rarr; Feedback &rarr; anpassen</li>
+        <li>Immer <strong>lokal herunterladen</strong> und im Ordner ablegen</li>
+        <li>Beispiele: Coaching-Protokoll, Instagram-Karussell</li>
+      </ul>
+      <div class="metaphor">
+        &laquo;Ein Skill beschreibt deinen Prozess &mdash; die Chefkoch-Datei.&raquo;
+      </div>
+    </div>
+
+    <div class="pillar pillar-3">
+      <div class="pillar-icon">&#9998;</div>
+      <div class="pillar-number">Säule 3</div>
+      <h2>Prompt&shy;verbesserung</h2>
+      <ul>
+        <li><strong>Meta-Prompt:</strong> &laquo;Verbessere folgenden Prompt, gib dir Mühe, stelle mir Rückfragen&raquo;</li>
+        <li>Klare <strong>Zielvorstellung</strong> &gt; perfekter Prompt</li>
+        <li>Ziel definieren &rarr; Prompt verbessern lassen &rarr; Kontext mitgeben</li>
+        <li><strong>Rückfragen</strong> einfordern für bessere Ergebnisse</li>
+        <li>Ergebnisse als neue <strong>Vorlage</strong> zurückführen</li>
+      </ul>
+      <div class="metaphor">
+        &laquo;Du musst nicht gut prompten &mdash; du brauchst eine klare Zielvorstellung.&raquo;
+      </div>
+    </div>
+
+  </div>
+
+  <div class="flow">
+    <div class="flow-box">
+      <div class="flow-steps">
+        <span class="flow-step">Ziel definieren</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">Prompt verbessern</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">Kontext geben</span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="flow-step">Ergebnis</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="quote">
+      Agentische KI arbeitet auf dein Ziel hin &mdash;<br>
+      gib ihr Kontext, Prozesse und klare Ziele.
+    </div>
+    <div class="meta">
+      JH Pro &middot; Digital WinWin &middot; ds@digital.winwin.global
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
